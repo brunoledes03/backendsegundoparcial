@@ -45,8 +45,31 @@ const deleteFavorite = asyncHandler(async (req, res) => {
   res.status(200).json({ id: req.params.id })
 })
 
+const updateFavorite = asyncHandler(async (req, res) => {
+  const favorite = await Favorite.findById(req.params.id)
+  
+  if (!favorite) {
+    res.status(404)
+    throw new Error('Favorito no encontrado')
+  }
+
+  if (favorite.user.toString() !== req.user.id) {
+    res.status(401)
+    throw new Error('No autorizado')
+  }
+
+  const updatedFavorite = await Favorite.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true }
+  )
+
+  res.status(200).json(updatedFavorite)
+})
+
 module.exports = {
   getFavorites,
   createFavorite,
+  updateFavorite,
   deleteFavorite,
 }
